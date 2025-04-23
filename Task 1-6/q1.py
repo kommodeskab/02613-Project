@@ -86,7 +86,7 @@ if __name__ == '__main__':
             axs[i].imshow(d[i], cmap='gray')
             axs[i].set_title(f'{t}, building_id={building_ids[i]}')
             axs[i].axis('off')
-        plt.savefig(f'q1_{t}.png')
+        plt.savefig(f'Task 1-6/q1_{t}.png')
         plt.close()
 
     # Print summary statistics in CSV format
