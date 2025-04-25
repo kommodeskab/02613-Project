@@ -1,4 +1,5 @@
 from os.path import join
+import os
 import sys
 import numpy as np
 from tqdm import tqdm
@@ -11,6 +12,12 @@ def load_data(load_dir, bid):
     interior_mask = np.load(join(load_dir, f"{bid}_interior.npy"))
     return u, interior_mask
 
+
+# Profile the reference jacobi function using cProfile
+import cProfile
+from line_profiler import profile
+
+@profile
 def jacobi(u, interior_mask, max_iter, atol=1e-6):
     for i in range(max_iter):
         # Compute average of left, right, up and down neighbors, see eq. (1)
@@ -22,6 +29,7 @@ def jacobi(u, interior_mask, max_iter, atol=1e-6):
         if delta < atol:
             break
     return u
+
 
 
 def summary_stats(u, interior_mask):
@@ -61,18 +69,25 @@ if __name__ == '__main__':
     MAX_ITER = 20_000
     ABS_TOL = 1e-4
 
-    def worker(chunk):
-        """Processes a chunk of data and returns results."""
-        u0_chunk, mask_chunk, max_iter, abs_tol = chunk
-        return [jacobi(u0, mask, max_iter, abs_tol) for u0, mask in zip(u0_chunk, mask_chunk)]
+    # def worker(chunk):
+    #     """Processes a chunk of data and returns results."""
+    #     u0_chunk, mask_chunk, max_iter, abs_tol = chunk
+    #     return [jacobi(u0, mask, max_iter, abs_tol) for u0, mask in zip(u0_chunk, mask_chunk)]
 
-    num_workers = 4    
-    u0_chunks = np.array_split(all_u0, num_workers)
-    mask_chunks = np.array_split(all_interior_mask, num_workers)
+    # num_workers = 4    
+    # u0_chunks = np.array_split(all_u0, num_workers)
+    # mask_chunks = np.array_split(all_interior_mask, num_workers)
     
-    with mp.Pool(num_workers) as pool:
-        all_u = pool.map(worker, [(u0_chunk, mask_chunk, MAX_ITER, ABS_TOL) for u0_chunk, mask_chunk in zip(u0_chunks, mask_chunks)])
-    all_u = np.concatenate(all_u)
+    # with mp.Pool(num_workers) as pool:
+    #     all_u = pool.map(worker, [(u0_chunk, mask_chunk, MAX_ITER, ABS_TOL) for u0_chunk, mask_chunk in zip(u0_chunks, mask_chunks)])
+    # all_u = np.concatenate(all_u)
+
+    
+
+    all_u = np.empty_like(all_u0)
+    for i, (u0, interior_mask) in enumerate(zip(all_u0, all_interior_mask)):
+        u = jacobi(u0, interior_mask, MAX_ITER, ABS_TOL)
+        all_u[i] = u
     
     # Print summary statistics in CSV format
     stat_keys = ['mean_temp', 'std_temp', 'pct_above_18', 'pct_below_15']
@@ -80,3 +95,5 @@ if __name__ == '__main__':
     for bid, u, interior_mask in zip(building_ids, all_u, all_interior_mask):
         stats = summary_stats(u, interior_mask)
         print(f"{bid},", ", ".join(str(stats[k]) for k in stat_keys))
+
+    # cProfile.run('jacobi(u, interior_mask, max_iter=20_000, atol=1e-4)', sort='time')

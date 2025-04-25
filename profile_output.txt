@@ -1,0 +1,22 @@
+Timer unit: 1e-09 s
+
+Total time: 5.7391 s
+File: /zhome/5a/2/167858/Desktop/02613-Project/Task 1-6/q4.py
+Function: jacobi at line 20
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    20                                           @profile
+    21                                           def jacobi(u, interior_mask, max_iter, atol=1e-6):
+    22      3602    1255191.0    348.5      0.0      for i in range(max_iter):
+    23                                                   # Compute average of left, right, up and down neighbors, see eq. (1)
+    24      3602 3561634039.0 988793.5     62.1          u_new = 0.25 * (u[1:-1, :-2] + u[1:-1, 2:] + u[:-2, 1:-1] + u[2:, 1:-1])
+    25      3602  541647602.0 150374.1      9.4          u_new_interior = u_new[interior_mask]
+    26      3602  938291931.0 260491.9     16.3          delta = np.abs(u[1:-1, 1:-1][interior_mask] - u_new_interior).max()
+    27      3602  693615693.0 192564.0     12.1          u[1:-1, 1:-1][interior_mask] = u_new_interior
+    28                                           
+    29      3602    2655702.0    737.3      0.0          if delta < atol:
+    30         1        521.0    521.0      0.0              break
+    31         1        255.0    255.0      0.0      return u
+
+  5.74 seconds - /zhome/5a/2/167858/Desktop/02613-Project/Task 1-6/q4.py:20 - jacobi
