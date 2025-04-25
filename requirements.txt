@@ -4,6 +4,7 @@ dill==0.4.0
 fonttools==4.57.0
 importlib_resources==6.5.2
 kiwisolver==1.4.7
+line_profiler==4.2.0
 matplotlib==3.9.4
 multiprocess==0.70.18
 numpy==2.0.2

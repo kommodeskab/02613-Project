@@ -1,3 +1,9 @@
+"""
+HOW TO RUN THIS CODE FROM THE COMMAND LINE:
+LINE_PROFILE=1 python Task\ 1-6/q4.py
+"""
+
+
 from os.path import join
 import os
 import sys
@@ -29,7 +35,6 @@ def jacobi(u, interior_mask, max_iter, atol=1e-6):
         if delta < atol:
             break
     return u
-
 
 
 def summary_stats(u, interior_mask):
