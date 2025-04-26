@@ -2,7 +2,10 @@
 
 Man skal bruge CUDA for at køre koden
 Derfor, skriv:
-    module load cuda/12.0
+    > voltash
+    > module load python3/3.10
+    > module load cuda/12.0
+    > source .venv/bin/activate
     
 I konsollen før du kører koden
 
@@ -16,7 +19,7 @@ from os.path import join
 import sys
 import cupy as cp
 from tqdm import tqdm
-
+    
 def load_data(load_dir, bid):
     SIZE = 512
     u = cp.zeros((SIZE + 2, SIZE + 2))
@@ -58,6 +61,7 @@ if __name__ == '__main__':
     LOAD_DIR = '/dtu/projects/02613_2025/data/modified_swiss_dwellings/'
     with open(join(LOAD_DIR, 'building_ids.txt'), 'r') as f:
         building_ids = f.read().splitlines()
+        print(f"Found {len(building_ids)} building ids.")
 
     if len(sys.argv) < 2:
         N = 1

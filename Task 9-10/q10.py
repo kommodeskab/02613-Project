@@ -63,6 +63,8 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2:
         N = 1
+    elif sys.argv[1] == 'all':
+        N = len(building_ids)
     else:
         N = int(sys.argv[1])
     building_ids = building_ids[:N]
@@ -78,7 +80,7 @@ if __name__ == '__main__':
     # Run jacobi iterations for each floor plan
     MAX_ITER = 20_000
     ABS_TOL = 1e-4
-    CHUNK_SIZE = 128
+    CHUNK_SIZE = 512
     
     # split all_u0 and all_interior_mask into chunks
     all_u0_splitted = cp.array_split(all_u0, math.ceil(N / CHUNK_SIZE))

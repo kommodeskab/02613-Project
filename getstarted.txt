@@ -1,7 +1,0 @@
-Make an environment:
-    python3 -m venv .venv
-    pip install -r requirements.txt
-
-Before starting coding:
-    module load python3/3.10
-    source .venv/bin/activate
