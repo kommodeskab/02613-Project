@@ -29,37 +29,35 @@ def load_data(load_dir, bid):
     interior_mask = np.load(join(load_dir, f"{bid}_interior.npy"))
     return u, interior_mask
 
+@cuda.jit
+def jacobi_kernel(u, u_new, interior_mask):
+    i, j = cuda.grid(2)
+    if 1 <= i < u.shape[0] - 1 and 1 <= j < u.shape[1] - 1:
+        if interior_mask[i - 1, j - 1]:
+            u_new[i, j] = 0.25 * (u[i-1, j] + u[i+1, j] + u[i, j-1] + u[i, j+1])
 
-def jacobi(u, interior_mask, max_iter, atol=1e-6):
-    u = np.copy(u)
+def run_jacobi_gpu(u, interior_mask, max_iter, atol=1e-6):
+    u_new = np.empty_like(u)
+    d_u = cuda.to_device(u)
+    d_u_new = cuda.to_device(u_new)
+    d_interior_mask = cuda.to_device(interior_mask)
 
-    for i in range(max_iter):
-        # Compute average of left, right, up and down neighbors, see eq. (1)
-        u_new = 0.25 * (u[1:-1, :-2] + u[1:-1, 2:] + u[:-2, 1:-1] + u[2:, 1:-1])
-        u_new_interior = u_new[interior_mask]
-        delta = np.abs(u[1:-1, 1:-1][interior_mask] - u_new_interior).max()
-        u[1:-1, 1:-1][interior_mask] = u_new_interior
+    threads_per_block = (16, 16)
+    blocks_per_grid_x = int(np.ceil(u.shape[0] / threads_per_block[0]))
+    blocks_per_grid_y = int(np.ceil(u.shape[1] / threads_per_block[1]))
+    blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
 
-        if delta < atol:
-            break
-    return u
-
-@jit(nopython=True)
-def jacobi_2(u, interior_mask, max_iter, atol=1e-6):
-    u_new = u.copy()
-    n1, n2 = interior_mask.shape
     for it in range(max_iter):
-        delta = 0.0
-        for i in range(1, n1 + 1):
-            for j in range(1, n2 + 1):
-                if interior_mask[i - 1, j - 1]:
-                    val = 0.25 * (u[i-1, j] + u[i+1, j] + u[i, j-1] + u[i, j+1])
-                    delta = max(delta, abs(val - u[i, j]))
-                    u_new[i, j] = val
-        u[:, :] = u_new
+        jacobi_kernel[blocks_per_grid, threads_per_block](d_u, d_u_new, d_interior_mask)
+        d_u.copy_to_host(u_new)
+
+        delta = np.abs(u - u_new).max()
+        u[:] = u_new
+
         if delta < atol:
             break
     return u
+
 
 def summary_stats(u, interior_mask):
     u_interior = u[1:-1, 1:-1][interior_mask]
