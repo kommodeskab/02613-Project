@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
     for i, (u0, interior_mask) in enumerate(zip(all_u0, all_interior_mask)):
-        u = run_jacobi_gpu(u0, interior_mask, MAX_ITER, ABS_TOL)
+        u = jacobi(u0, interior_mask, MAX_ITER, ABS_TOL)
         all_u[i] = u
     end_time = time.time()
     print(f"Jacobi iterations took {end_time - start_time:.2f} seconds")

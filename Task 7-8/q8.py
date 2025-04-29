@@ -29,34 +29,32 @@ def load_data(load_dir, bid):
     interior_mask = np.load(join(load_dir, f"{bid}_interior.npy"))
     return u, interior_mask
 
+
 @cuda.jit
 def jacobi_kernel(u, u_new, interior_mask):
     i, j = cuda.grid(2)
     if 1 <= i < u.shape[0] - 1 and 1 <= j < u.shape[1] - 1:
-        if interior_mask[i - 1, j - 1]:
+        if interior_mask[i-1, j-1]:
             u_new[i, j] = 0.25 * (u[i-1, j] + u[i+1, j] + u[i, j-1] + u[i, j+1])
 
-def run_jacobi_gpu(u, interior_mask, max_iter, atol=1e-6):
-    u_new = np.empty_like(u)
-    d_u = cuda.to_device(u)
-    d_u_new = cuda.to_device(u_new)
-    d_interior_mask = cuda.to_device(interior_mask)
+def jacobi_cuda(u0, interior_mask, MAX_ITER, ABS_TOL):
+    u = np.copy(u0).astype(np.float32)
+    u_new = np.copy(u0).astype(np.float32)
+    interior_mask = interior_mask.astype(np.bool_)
+    u_d = cuda.to_device(u)
+    u_new_d = cuda.to_device(u_new)
+    mask_d = cuda.to_device(interior_mask)
 
     threads_per_block = (16, 16)
-    blocks_per_grid_x = int(np.ceil(u.shape[0] / threads_per_block[0]))
-    blocks_per_grid_y = int(np.ceil(u.shape[1] / threads_per_block[1]))
+    blocks_per_grid_x = (u.shape[0] + threads_per_block[0] - 1) // threads_per_block[0]
+    blocks_per_grid_y = (u.shape[1] + threads_per_block[1] - 1) // threads_per_block[1]
     blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
 
-    for it in range(max_iter):
-        jacobi_kernel[blocks_per_grid, threads_per_block](d_u, d_u_new, d_interior_mask)
-        d_u.copy_to_host(u_new)
+    for _ in range(MAX_ITER):
+        jacobi_kernel[blocks_per_grid, threads_per_block](u_d, u_new_d, mask_d)
+        u_d, u_new_d = u_new_d, u_d 
 
-        delta = np.abs(u - u_new).max()
-        u[:] = u_new
-
-        if delta < atol:
-            break
-    return u
+    return u_d.copy_to_host()
 
 
 def summary_stats(u, interior_mask):
@@ -101,7 +99,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
     for i, (u0, interior_mask) in enumerate(zip(all_u0, all_interior_mask)):
-        u = run_jacobi_gpu(u0, interior_mask, MAX_ITER, ABS_TOL)
+        u = jacobi_cuda(u0, interior_mask, MAX_ITER, ABS_TOL)
         all_u[i] = u
     end_time = time.time()
     print(f"Jacobi iterations took {end_time - start_time:.2f} seconds")
