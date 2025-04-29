@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 
 column_names = ['mean_temp', 'std_temp', 'pct_above_18', 'pct_below_15']
 
-# Load the CSV file
 df = pd.read_csv('/zhome/a1/0/163225/project_mini/02613-Project/Task 9-10/all_floorplans.csv', header=None, names=column_names)
 
 plt.figure(figsize=(8, 5))
@@ -13,7 +12,7 @@ plt.xlabel('Mean Temperature (ºC)')
 plt.ylabel('Number of Buildings')
 plt.grid(True)
 plt.tight_layout()
-plt.savefig('/zhome/a1/0/163225/project_mini/02613-Project/Task_12(stats)/mean_temperature_histogram.png')  # Save the histogram as a PNG file
+plt.savefig('/zhome/a1/0/163225/project_mini/02613-Project/Task_12(stats)/mean_temperature_histogram.png')
 plt.close()
 
 # average mean temperature
