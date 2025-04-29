@@ -18,11 +18,11 @@
 #BSUB -R "span[hosts=1]"
 
 # walltime
-#BSUB -W 10:00
+#BSUB -W 2:00
 #BSUB -o hpc/output_%J.out 
 #BSUB -e hpc/error_%J.err   
 
 nvidia-smi
-source /dtu/projects/02613_2025/conda/conda_init.sh
-conda activate 02613
+module load python3/3.10.16 cuda/12.0
+source .venv/bin/activate
 python3 Task\ 9-10/q10.py all

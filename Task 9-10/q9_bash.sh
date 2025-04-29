@@ -23,6 +23,6 @@
 #BSUB -e hpc/error_%J.err   
 
 nvidia-smi
-source /dtu/projects/02613_2025/conda/conda_init.sh
-conda activate 02613
-python3 Task\ 9-10/q9.py 10
+module load python3/3.10.16 cuda/12.0
+source .venv/bin/activate
+python3 Task\ 9-10/q9.py 50

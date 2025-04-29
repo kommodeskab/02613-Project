@@ -24,6 +24,6 @@
 # what to do
 # (det er en god ide at køre nedenstående i terminalen og se om det virker inden man sætter det i kø)
 nvidia-smi
-module load python3/3.10.16 cuda/11.8
+module load python3/3.10.16 cuda/12.0
 source .venv/bin/activate
-python <your_script.py>
+python3 <your_script.py> <your_arguments>

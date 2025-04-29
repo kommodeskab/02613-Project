@@ -2,8 +2,10 @@
 
 Man skal bruge CUDA for at køre koden
 Derfor, skriv:
-    module load cuda/12.0
-    
+    > voltash
+    > module load python3/3.10
+    > module load cuda/12.0
+    > source .venv/bin/activate
 I konsollen før du kører koden
 
 Profile:
@@ -68,6 +70,7 @@ if __name__ == '__main__':
     else:
         N = int(sys.argv[1])
     building_ids = building_ids[:N]
+    print(f"Using {N} building ids.")
 
     # Load floor plans
     all_u0 = cp.empty((N, 514, 514))
