@@ -43,7 +43,10 @@ def jacobi(u, interior_mask, max_iter, atol=1e-6):
         if delta < atol:
             break
     return u
+import cProfile
+from line_profiler import profile
 
+@profile
 @jit(nopython=True)
 def jacobi_2(u, interior_mask, max_iter, atol=1e-6):
     u_new = u.copy()
@@ -53,9 +56,9 @@ def jacobi_2(u, interior_mask, max_iter, atol=1e-6):
         for i in range(1, n1 + 1):
             for j in range(1, n2 + 1):
                 if interior_mask[i - 1, j - 1]:
-                    val = 0.25 * (u[i-1, j] + u[i+1, j] + u[i, j-1] + u[i, j+1])
-                    delta = max(delta, abs(val - u[i, j]))
-                    u_new[i, j] = val
+                    uu_new = 0.25 * (u[i-1, j] + u[i+1, j] + u[i, j-1] + u[i, j+1])
+                    delta = max(delta, abs(uu_new - u[i, j]))
+                    u_new[i, j] = uu_new
         u[:, :] = u_new
         if delta < atol:
             break
@@ -103,7 +106,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
     for i, (u0, interior_mask) in enumerate(zip(all_u0, all_interior_mask)):
-        u = jacobi(u0, interior_mask, MAX_ITER, ABS_TOL)
+        u = jacobi_2(u0, interior_mask, MAX_ITER, ABS_TOL)
         all_u[i] = u
     end_time = time.time()
     print(f"Jacobi iterations took {end_time - start_time:.2f} seconds")
