@@ -1,6 +1,6 @@
 """
 HOW TO RUN THIS CODE FROM THE COMMAND LINE:
-LINE_PROFILE=1 python Task\ 1-6/q4.py
+python Task\ 1-6/q5.py
 """
 
 from os.path import join
@@ -44,7 +44,17 @@ def summary_stats(u, interior_mask):
         'pct_below_15': pct_below_15,
     }
 
-if __name__ == '__main__':
+import time
+import numpy as np
+import matplotlib.pyplot as plt
+from multiprocessing import Pool
+from tqdm import tqdm
+
+def call_jacobi(args):
+    return jacobi(*args)
+
+
+def run_experiment(N, n_processes, scheduling="dynamic"):
     # Load data
     LOAD_DIR = r'/dtu/projects/02613_2025/data/modified_swiss_dwellings/'
     with open(join(LOAD_DIR, 'building_ids.txt'), 'r') as f:
@@ -67,36 +77,56 @@ if __name__ == '__main__':
     # Run jacobi iterations for each floor plan
     MAX_ITER = 20_000
     ABS_TOL = 1e-4
-    
-    from multiprocessing.pool import Pool
-    n_processes = 2
-    pool = Pool(n_processes)
-    # I want to split the floorplans into n_processes chunks and run jacobi on each chunk in parallel
-    all_u = np.empty_like(all_u0)
 
-    for i in tqdm(range(n_processes)):
-        start = i * (N // n_processes)
-        end = (i + 1) * (N // n_processes) if i != n_processes - 1 else N
-        print(f"start: {start}, end: {end}")
-        u0_chunk = all_u0[start:end]
-        mask_chunk = all_interior_mask[start:end]
-        print(f"u0_chunk shape: {u0_chunk.shape}, mask_chunk shape: {mask_chunk.shape}")
-        # print(f"u0_chunk shape: {u0_chunk.shape}, mask_chunk shape: {mask_chunk.shape}")
-        all_u[start:end] = pool.starmap(jacobi, [(u0, mask, MAX_ITER, ABS_TOL) for u0, mask in zip(u0_chunk, mask_chunk)])
-    pool.close()
-    pool.join()
-    # all_u = pool.map(jacobi, [(u0, mask, MAX_ITER, ABS_TOL) for u0, mask in zip(all_u0, all_interior_mask)])
-    all_u = np.concatenate(all_u)
+    # Prepare input arguments for parallel processing
+    input_args = [(u0, mask, MAX_ITER, ABS_TOL) for u0, mask in zip(all_u0, all_interior_mask)]
 
+    start_time = time.perf_counter()
 
-    # all_u = np.empty_like(all_u0)
-    # for i, (u0, interior_mask) in enumerate(zip(all_u0, all_interior_mask)):
-    #     u = jacobi(u0, interior_mask, MAX_ITER, ABS_TOL)
-    #     all_u[i] = u
-    
-    # Print summary statistics in CSV format
-    # stat_keys = ['mean_temp', 'std_temp', 'pct_above_18', 'pct_below_15']
-    # print('building_id, ' + ', '.join(stat_keys))  # CSV header
-    # for bid, u, interior_mask in zip(building_ids, all_u, all_interior_mask):
-    #     stats = summary_stats(u, interior_mask)
-    #     print(f"{bid},", ", ".join(str(stats[k]) for k in stat_keys))
+    with Pool(n_processes) as pool:
+        if scheduling == "static":
+            results = list(tqdm(pool.starmap(jacobi, input_args),
+                    total=len(input_args),
+                    ncols=100,
+                    smoothing=0.1,
+                    desc=f"{scheduling.title()} {n_processes} procs"))
+
+        elif scheduling == "dynamic":
+            iterator = pool.imap(call_jacobi, input_args)
+            results = list(tqdm(iterator, total=len(input_args)))
+        else:
+            raise ValueError("Unknown scheduling type!")
+
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    print(f"{scheduling.title()} scheduling with {n_processes} processes took {elapsed_time:.2f} seconds.")
+
+    return elapsed_time
+
+if __name__ == '__main__':
+    N = 64
+    n_process_list = [1, 2, 4, 8, 16]
+    times_static = []
+    times_dynamic = []
+
+    for n_proc in n_process_list:
+        # times_static.append(run_experiment(N, n_proc, scheduling="static"))
+        times_dynamic.append(run_experiment(N, n_proc, scheduling="dynamic"))
+
+    # Plot
+    plt.figure()
+    # baseline_static = times_static[0]
+    baseline_dynamic = times_dynamic[0]
+    # plt.plot(n_process_list, [baseline_static / t for t in times_static], marker='o', label='Static scheduling')
+    plt.plot(n_process_list, [baseline_dynamic / t for t in times_dynamic], marker='x', label='Dynamic scheduling')
+    plt.xlabel('Number of processes')
+    plt.ylabel('Speedup')
+    plt.title('Parallel Dynamic Speedup Comparison')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    # savefig
+    plt.savefig('Task 1-6/speedup_dynamic.png', dpi=300, bbox_inches='tight')
+
+    # save times
+    np.save('times_dynamic.npy', times_dynamic)
