@@ -4,7 +4,6 @@
 #BSUB -J q8
 
 #BSUB -q gpuv100
-#BSUB -R "select[gpu32gb]"
 
 # number of GPUs to use
 #BSUB -gpu "num=1:mode=exclusive_process"

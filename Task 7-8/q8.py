@@ -37,21 +37,20 @@ def jacobi_kernel(u, u_new, interior_mask):
         if interior_mask[i-1, j-1]:
             u_new[i, j] = 0.25 * (u[i-1, j] + u[i+1, j] + u[i, j-1] + u[i, j+1])
 
-def jacobi_cuda(u0, interior_mask, MAX_ITER, ABS_TOL):
+def jacobi_cuda(u0, interior_mask, MAX_ITER):
+    #Send data to device
     u = np.copy(u0).astype(np.float32)
     u_new = np.copy(u0).astype(np.float32)
-    interior_mask = interior_mask.astype(np.bool_)
     u_d = cuda.to_device(u)
     u_new_d = cuda.to_device(u_new)
     mask_d = cuda.to_device(interior_mask)
+    #Define Blocks and Threads
+    threads = (16, 16)
+    blocks = ((u.shape[0] + threads[0] - 1) // threads[0], (u.shape[1] + threads[1] - 1) // threads[1])
 
-    threads_per_block = (16, 16)
-    blocks_per_grid_x = (u.shape[0] + threads_per_block[0] - 1) // threads_per_block[0]
-    blocks_per_grid_y = (u.shape[1] + threads_per_block[1] - 1) // threads_per_block[1]
-    blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
-
+    #Run Jacobi iterations
     for _ in range(MAX_ITER):
-        jacobi_kernel[blocks_per_grid, threads_per_block](u_d, u_new_d, mask_d)
+        jacobi_kernel[blocks, threads](u_d, u_new_d, mask_d)
         u_d, u_new_d = u_new_d, u_d 
 
     return u_d.copy_to_host()
@@ -99,7 +98,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
     for i, (u0, interior_mask) in enumerate(zip(all_u0, all_interior_mask)):
-        u = jacobi_cuda(u0, interior_mask, MAX_ITER, ABS_TOL)
+        u = jacobi_cuda(u0, interior_mask, MAX_ITER)
         all_u[i] = u
     end_time = time.time()
     print(f"Jacobi iterations took {end_time - start_time:.2f} seconds")
