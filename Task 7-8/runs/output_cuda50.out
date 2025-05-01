@@ -1,4 +1,4 @@
-Jacobi iterations took 67.99 seconds
+Jacobi iterations took 65.89 seconds
 building_id, mean_temp, std_temp, pct_above_18, pct_below_15
 10000, 14.016628045021942, 6.367637386341267, 30.966330331633575, 55.47538967849264
 10009, 11.010177813560977, 5.80927563022521, 16.696401648406876, 74.93466680068349
@@ -53,15 +53,15 @@ building_id, mean_temp, std_temp, pct_above_18, pct_below_15
 
 ------------------------------------------------------------
 Sender: LSF System <lsfadmin@hpc.dtu.dk>
-Subject: Job 24842258: <q8> in cluster <dcc> Done
+Subject: Job 24853280: <q8> in cluster <dcc> Done
 
-Job <q8> was submitted from host <hpclogin1> by user <s214622> in cluster <dcc> at Thu May  1 08:30:28 2025
-Job was executed on host(s) <4*n-62-20-16>, in queue <gpuv100>, as user <s214622> in cluster <dcc> at Thu May  1 09:02:54 2025
+Job <q8> was submitted from host <n-62-20-1> by user <s214622> in cluster <dcc> at Thu May  1 20:56:18 2025
+Job was executed on host(s) <4*n-62-20-12>, in queue <gpuv100>, as user <s214622> in cluster <dcc> at Thu May  1 20:56:20 2025
 </zhome/7e/7/168289> was used as the home directory.
 </zhome/7e/7/168289/Desktop/02613-Project> was used as the working directory.
-Started at Thu May  1 09:02:54 2025
-Terminated at Thu May  1 09:04:07 2025
-Results reported at Thu May  1 09:04:07 2025
+Started at Thu May  1 20:56:20 2025
+Terminated at Thu May  1 20:57:33 2025
+Results reported at Thu May  1 20:57:33 2025
 
 Your job looked like:
 
@@ -99,16 +99,16 @@ Successfully completed.
 
 Resource usage summary:
 
-    CPU time :                                   68.80 sec.
-    Max Memory :                                 214 MB
-    Average Memory :                             214.00 MB
+    CPU time :                                   66.24 sec.
+    Max Memory :                                 213 MB
+    Average Memory :                             213.00 MB
     Total Requested Memory :                     16384.00 MB
-    Delta Memory :                               16170.00 MB
+    Delta Memory :                               16171.00 MB
     Max Swap :                                   -
     Max Processes :                              4
-    Max Threads :                                7
-    Run time :                                   73 sec.
-    Turnaround time :                            2019 sec.
+    Max Threads :                                9
+    Run time :                                   75 sec.
+    Turnaround time :                            75 sec.
 
 The output (if any) is above this job summary.
 
@@ -116,5 +116,5 @@ The output (if any) is above this job summary.
 
 PS:
 
-Read file <error_24842258.err> for stderr output of this job.
+Read file <error_24853280.err> for stderr output of this job.
 
