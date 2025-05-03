@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # må IKKE indeholde mellemrum
-#BSUB -J <job_name>
+#BSUB -J q1
 
 #BSUB -q gpuv100
 
@@ -27,4 +27,4 @@
 nvidia-smi
 module load python3/3.10.16 cuda/12.0
 source .venv/bin/activate
-python3 <your_script.py> <your_arguments>
+ python3 Task\ 1-6/q1_no_plot.py 20

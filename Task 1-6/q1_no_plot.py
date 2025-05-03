@@ -1,6 +1,5 @@
 from os.path import join
 import sys
-import matplotlib.pyplot as plt
 import time
 import numpy as np
 from tqdm import tqdm
@@ -74,21 +73,6 @@ if __name__ == '__main__':
     t2 = time.time()
     print(f"Time to compute {N} floor plans: {t2 - t1:.2f} s")
     
-    data_to_plot = [all_interior_mask, all_u0_for_plot, all_u]
-    titles = ['Interior mask', 'Initial temperature', 'Final temperature']
-    
-    for d, t in zip(data_to_plot, titles):
-        n_plot = min(3, N)
-        fig, axs = plt.subplots(1, n_plot, figsize=(5 * n_plot, 5))
-        axs = np.atleast_1d(axs)
-        axs : list[plt.Axes]
-        for i in range(n_plot):
-            axs[i].imshow(d[i], cmap='gray')
-            axs[i].set_title(f'{t}, building_id={building_ids[i]}')
-            axs[i].axis('off')
-        plt.savefig(f'Task 1-6/q1_{t}.png')
-        plt.close()
-
     # Print summary statistics in CSV format
     stat_keys = ['mean_temp', 'std_temp', 'pct_above_18', 'pct_below_15']
     print('building_id, ' + ', '.join(stat_keys))  # CSV header
