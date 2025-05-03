@@ -10,6 +10,7 @@
 #BSUB -gpu "num=1:mode=exclusive_process"
 
 # number of cores to use
+#BSUB -R "select[model == XeonE5_2660v3]"
 #BSUB -n 4
 
 # gb memory per core

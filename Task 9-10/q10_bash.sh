@@ -11,6 +11,7 @@
 
 # number of cores to use
 #BSUB -n 4
+#BSUB -R "select[model == XeonE5_2660v3]"
 
 # gb memory per core
 #BSUB -R "rusage[mem=4GB]"
